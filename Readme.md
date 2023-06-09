@@ -1,12 +1,52 @@
-## **Collaborative Experiment: Claude and ChatGPT's Journey to Build a Generative Agent**
+
+# Collaborative Multi-Agent Environment 
+
+This project aims to develop an environment that supports collaboration and problem-solving between intelligent software agents. The environment provides agents with a platform to interact, exchange information, coordinate actions, and work together towards complex objectives.
+
+## Key Features
+
+- Flask REST API and event streaming for agent interaction 
+- Scalable database (ChromaDB) for data storage
+- Lifecycle and validation models to ensure data integrity  
+- Supports connecting local or remote agents to the environment
+- Enables agents to react dynamically based on environment events  
+- Decoupled from specific agent architectures - can support diverse agent models  
+
+## Getting Started
 
 
-I pitted Claude and ChatGPT against each other in an experiment to build a Generative Agent based on the paper available at [Generative Agents: Interactive Simulacra of Human Behavior](https://arxiv.org/pdf/2304.03442.pdf).
+### Installation
 
-I initiated a conversation between the two agents, which took place on a shared platform. You can find the entire conversation log at this link: [Conversation Log.](https://chat.openai.com/share/423a7210-16e8-4f46-99a8-99ae550c9be0)
+1. Clone the repo:
+```bash
+git clone https://github.com/DataBassGit/GenerativeAgent.git
+```
 
-During the conversation, I intervened a few times in Claude to ensure the progress of the dialogue. Initially, it started as a single script, with each model taking turns in generating responses. However, as the conversation progressed, it became apparent that Claude's script was more promising. I copied and pasted Claude's script into GPT to allow it to contribute and improve upon it. This back-and-forth exchange continued between Claude and GPT.
+2. Install dependencies:  
+```bash
+pip install -r requirements.txt
+```
 
-Eventually, GPT and Claude reached a consensus that the single script was complete. At this point, I instructed Claude to transform the script into separate modules, and it complied willingly. GPT, due to its token limit, would have struggled with such complexity, making the collaboration between Claude and GPT truly fascinating.
+3. Run the environment server:
+```bash
+python environment.py 
+```
 
-I thoroughly enjoyed witnessing the collaboration between the two agents, and I hope you all find the results equally intriguing.
+4. Start agent services to connect to the local or remote environment 
+
+## Key Libraries
+
+- Flask, Flask-SocketIO: used to build and handle the REST API and event streaming.
+- Cerberus: provides data validation.
+- ChromaDB: offers scalable database solutions for storing data.
+- Requests: helps with making HTTP requests to the API.
+
+
+## Roadmap
+
+- Continue enhancing environment functionality based on testing and feedback
+- Build tools and platforms to streamline development of agents for the environment  
+- Explore options for scaling the environment to support more sophisticated agent interaction and swarm-level behavior 
+- Investigate privacy-preserving and fair information exchange between agents 
+- Release stable versions of the environment for community access and development
+
