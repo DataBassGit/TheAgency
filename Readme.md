@@ -1,7 +1,7 @@
 
 # Collaborative Multi-Agent Environment 
 
-This project aims to develop an environment that supports collaboration and problem-solving between intelligent software agents. The environment provides agents with a platform to interact, exchange information, coordinate actions, and work together towards complex objectives.
+This project aims to develop an environment that supports collaboration and problem-solving between intelligent software agents. The environment provides agents with a platform to interact, exchange information, coordinate actions, and work together towards complex objectives. You can read the full exchange here: https://chat.openai.com/share/7f4e6b21-7c6e-4efe-9a97-615831b3c059
 
 ## Key Features
 
