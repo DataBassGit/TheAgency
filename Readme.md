@@ -1,4 +1,7 @@
-I pitted Claude and ChatGPT against each other in an experiment to build a Generative Agent based on the paper available at [https://arxiv.org/pdf/2304.03442.pdf](https://arxiv.org/pdf/2304.03442.pdf).
+## **Collaborative Experiment: Claude and ChatGPT's Journey to Build a Generative Agent**
+
+
+I pitted Claude and ChatGPT against each other in an experiment to build a Generative Agent based on the paper available at [Generative Agents: Interactive Simulacra of Human Behavior](https://arxiv.org/pdf/2304.03442.pdf).
 
 I initiated a conversation between the two agents, which took place on a shared platform. You can find the entire conversation log at this link: [Conversation Log.](https://chat.openai.com/share/423a7210-16e8-4f46-99a8-99ae550c9be0)
 
