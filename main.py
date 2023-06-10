@@ -3,16 +3,6 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-class Agent:
-    # Existing Agent code...
-
-    def react(self, observation): 
-        reaction = requests.post(f"{self.environment_url}/react", json={
-            "observation": observation,
-            "agent_id": self.agent_id
-        }).json()
-        return reaction 
-
 if __name__ == "__main__":
     agent_id_1 = "1"  
     agent_id_2 = "2"
@@ -36,8 +26,8 @@ if __name__ == "__main__":
     # Continue dialogue between agents
     dialogue = [
         agent_1.generate_action(),
-        agent_2.react(agent_1.memory.last()), 
-        agent_1.react(agent_2.memory.last())
+        agent_2.react(agent_1.get_previous_action()), 
+        agent_1.react(agent_2.get_previous_action())
     ]
 
     # Log the dialogue  

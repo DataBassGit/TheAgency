@@ -16,7 +16,8 @@ agent2_objective = "Collaborate with other agents to solve complex problems."
 # Load objectives into database   
 objectives_collection.add(  
 documents=[agent1_objective, agent2_objective],      
-metadatas=[{"agent_id": 1}, {"agent_id": 2}]  
+metadatas=[{"agent_id": 1}, {"agent_id": 2}],  
+ids=['1', '2']  # Changed ids to strings
 )   
 
 # Get an agent's objective by ID
@@ -30,7 +31,7 @@ def get_current_objective(agent_id):
 
 # New function to update objectives using Claude API 
 def update_objectives():
-# Request recent events and agent summaries from environment
+    # Request recent events and agent summaries from environment
     events_url = "http://environment_url/recent_events" 
     summaries_url = "http://environment_url/agent_summaries" 
     
@@ -67,7 +68,8 @@ def update_objectives():
     try: 
         objectives_collection.update(
         documents=new_objectives,
-        metadatas=[{"agent_id": 1}, {"agent_id": 2}]  
+        metadatas=[{"agent_id": 1}, {"agent_id": 2}],  
+        ids=['1', '2']  # Changed ids to strings
         )
     except Exception as e: 
         print(f"Error updating objectives: {e}")

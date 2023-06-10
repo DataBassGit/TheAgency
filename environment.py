@@ -1,76 +1,80 @@
-import chromadb  
-
-from flask import Flask, request, jsonify
-
+import chromadb
+from flask import Flask, Blueprint
 from flask_socketio import SocketIO
 
-from cerberus import Validator   
+from envapi import validation, database, handlers
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 
-app.config['SECRET_KEY'] = 'secret!'  
-
-socketio = SocketIO(app)  
-
-# Initialize ChromaDB
-client = chromadb.Client()   
+# Initialize ChromaDB 
+client = chromadb.Client()
 
 # ChromaDB collections
 objects_collection = client.get_or_create_collection("objects")
-agents_collection = client.get_or_create_collection("agents")
-events_collection = client.get_or_create_collection("events") 
+agents_collection = client.get_or_create_collection("agents") 
+events_collection = client.get_or_create_collection("events")
+locations_collection = client.get_or_create_collection("locations")
 
-# New locations collection
-locations = client.get_or_create_collection("locations")   
+handlers.init_handlers(socketio, objects_collection, agents_collection, events_collection)
 
-# Validation schema for object creation
-create_schema = {
-    'creating_agent': {'type': 'string'},
-    'purpose': {'type': 'string'},
-    'required': {'type': 'list', 'schema': {'type': 'string'}} 
-}  
+# ... rest of your code ...
 
-# Updated validation method 
-def validate_create(request, collection): 
-    if collection == "locations":
-        # Location validation logic 
-    elif collection == "objects":
-        # Existing object validation logic
-    v = Validator(create_schema, allow_unknown=True)
-    if not v.validate(request):
-        errors = {}
-        for key, value in v.errors.items():
-            if key == 'required':
-                errors[key] = f'At least one {key} field must be provided.'
-            else:
-                errors[key] = f'The {key} field must be a string.'
-        return False, errors
-    return True, None  
 
-# Location creation endpoint
-@app.route('/locations', methods=['POST']) 
+# REST API endpoint to get details of all objects
+@app.route('/objects')
+def get_objects():
+    objects = database.objects_collection.get_all()
+    return jsonify(objects)
+
+# REST API endpoint to get details of a single object by ID
+@app.route('/objects/<object_id>')    
+def get_object(object_id):
+    object = database.objects_collection.get(object_id)
+    return jsonify(object)
+
+# Endpoint for agents to request creation of a new object 
+@app.route('/objects', methods=['POST'])
+def create_object():
+    # Get required details from request
+    data = request.get_json()
+    # Validate request payload
+    valid, errors = validation.validate_create(data)
+    if not valid:
+        return jsonify({
+            "errors": errors
+        }), 400
+    # Create new object
+    object = {
+        'name': data['name'],
+        'description': data['description'],
+        'required': data['required'] 
+    }
+    # Add object to ChromaDB collection
+    database.objects_collection.add(object)
+    return jsonify(object), 201     
+
+locations_blueprint = Blueprint('locations', __name__)
+
+@locations_blueprint.route('/locations', methods=['POST'])
 def create_location():
-    try: 
-       # Validate request payload
-        valid, errors = validate_create(request, "locations")
-        if not valid:
-            return jsonify({"errors": errors}), 400 
-            
-        # Check for missing description and return prompt if needed
-            
-        # Add new location to collection  
-        new_location = {...}
-        location_id = locations.add(new_location)
-        
-        # Update connected locations to reference new location ID  
-    
+    is_valid, error = validation.validate_location(request)
+    if not is_valid:
+        return jsonify({"error": error}), 400
+    try:
+        new_location = {
+            'name': request.json['name'],
+            'coordinates': {
+                'x': request.json['coordinates']['x'],
+                'y': request.json['coordinates']['y']  
+            }
+        }
+        location_id = database.locations_collection.add(new_location)
         return jsonify(new_location), 201
-    except Exception as e: 
+    except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
-# Additional endpoints   
 
-# Define object state transitions, events, and lifecycle handling logic  
+app.register_blueprint(locations_blueprint)
 
-if __name__ == '__main__':
-socketio.run(app) 
+if __name__ == '__main__': 
+    socketio.run(app)

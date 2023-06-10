@@ -1,5 +1,7 @@
 import logging
 import requests
+import chromadb
+from datetime import datetime
 
 from objectives import get_current_objective
 
@@ -12,22 +14,21 @@ class Agent:
         self.environment_url = environment_url
         self.logger = logging.getLogger(__name__)
         
-     # Connect to ChromaDB
-    self.client = chromadb.Client()  
+        # Connect to ChromaDB
+        self.client = chromadb.Client()  
     
-    # Create a collection for this agent's memory
-    self.memory = self.client.get_or_create_collection(f"agent_{self.agent_id}")  
+        # Create a collection for this agent's memory
+        self.memory = self.client.get_or_create_collection(f"agent_{self.agent_id}")  
     
-    # Create index on memory collection
-    if self.memory.count() > 0:
-        self.memory.create_index()
-        
+        # Create index on memory collection
+        if self.memory.count() > 0:
+            self.memory.create_index()
+
     def generate_action(self):
-        # Get current objective, objects in room and previous action
-        objective = requests.get(f"{self.environment_url}/objectives/{self.agent_id}").json()
+        objective = get_current_objective(self.agent_id)
         room_objects = requests.get(f"{self.environment_url}/room_objects").json()
-        previous_action = get_previous_action()
-        event = get_current_event() or "none"
+        previous_action = self.get_previous_action()
+        event = self.get_current_event() or "none"
         
         # Construct query to retrieve relevant memories based on context
         query = {
@@ -52,55 +53,39 @@ class Agent:
         self.summary_description += context  
         
         # Generate next action based on summary and memories
-        action = generate_action(self.summary_description, relevant_memories, self.environment_url)
+        action = self._generate_action(self.summary_description, relevant_memories, self.environment_url)
         self.logger.info(f"Action: {action}")
-        return action  
+        return action 
+
+    def _generate_action(self, summary, memories, environment_url):
+        # Example logic for generating an action - This will be dependent on your exact use case
+        return "generated_action"
         
     def react(self, observation):
         reaction = requests.post(f"{self.environment_url}/react", json={
-            "observation": observation
+            "observation": observation,
+            "agent_id": self.agent_id
         }).json()
         self.logger.info(f"Reaction: {reaction}")
         return reaction
 
-    # Add event to memory logic unchanged 
-    
-    # Memory analysis logic unchanged
+    def add_event_to_memory(self, event, id):
+        self.memory.add(  
+            documents=[event], 
+            metadatas={"agent_id": id(self), "timestamp": datetime.now().isoformat()},  
+            ids=[id]  
+        )  
 
+    def analyze_memory(self):  
+        memory_analysis = self.memory.analyze(metrics=["count"], group_by=["timestamp"])  
+        self.logger.info(f"Memory analysis: {memory_analysis}")
 
+    def get_previous_action(self):
+        # Retrieve previous action from memory
+        if self.memory.count() > 0:
+            return self.memory.query({})[-1]["previous_action"]
+        return None
 
-	def add_event_to_memory(self, event, id):  
-
-		""" 
-
-		Add an event to the agent's memory in ChromaDB.  
-
-		"""  
-
-		self.memory.add(  
-
-		documents=[event], 
-
-		metadatas={     
-
-			"agent_id": id(self),    
-
-			"timestamp": datetime.now().isoformat()
-
-		},  
-
-		ids=[id]  
-
-		)  
-
-# Analyze memory to gain insights  
-
-		memory_analysis = self.memory.analyze(  
-
-		metrics=["count"],  
-
-		group_by=["timestamp"]  
-
-		)  
-
-		self.logger.info(f"Memory analysis: {memory_analysis}")
+    def get_current_event(self):
+        # Example logic for getting current event - This will be dependent on your exact use case
+        return "current_event"
