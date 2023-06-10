@@ -1,8 +1,8 @@
 import chromadb
-from flask import Flask, Blueprint
+from flask import Flask, Blueprint, jsonify, request
 from flask_socketio import SocketIO, join_room, emit
 
-from envapi import validation, database, handlers
+from envapi import validation, handlers
 
 print('\nFlask Establishing')
 app = Flask(__name__)
@@ -23,7 +23,7 @@ print('\nHandlers Initted')
 # REST API endpoint to get details of all objects
 @app.route('/objects')
 def get_objects():
-    objects = database.objects_collection.get_all()
+    objects = database.objects_collection.get()
     print(f'\nObjects endpoint: {objects}')
     return jsonify(objects)
 
@@ -75,16 +75,16 @@ def send_message(receiver_id):
 
 # Endpoint for agents to request creation of a new object 
 @app.route('/objects', methods=['POST'])
-def create_object():
+def create_object(request):
     # Get required details from request
     data = request.get_json()
     # Validate request payload
-    valid, errors = validation.validate_create(data)
-    if not valid:
-        return jsonify({
-            "errors": errors
-        }), 400
-    print(f'\nError Creating Object: {data}')
+    #valid, errors = validation.validate_create(data)
+    #if not valid:
+    #    return jsonify({
+    #        "errors": errors
+    #    }), 400
+    print(f'\nObject: {data}')
     # Create new object
     object = {
         'name': data['name'],
@@ -100,24 +100,21 @@ locations_blueprint = Blueprint('locations', __name__)
 
 @locations_blueprint.route('/locations', methods=['POST'])
 def create_location():
-    is_valid, error = validation.validate_location(request)
-    if not is_valid:
-        return jsonify({"error": error}), 400
-        print(f'Error Creating Location: {request}')
-    try:
-        new_location = {
-            'name': request.json['name'],
-            'coordinates': {
-                'x': request.json['coordinates']['x'],
-                'y': request.json['coordinates']['y']  
-            }
-        }
-        location_id = database.locations_collection.add(new_location)
+    #is_valid, error = validation.validate_location(request.json)
+    #if not is_valid:
+        #return jsonify({"error": error}), 400
+
+    print(f'Location: {request.json}')
+
+    try: 
+        new_location = request.json['name']
+        metadata = {'coordinates': {'x': request.json['coordinates']['x'],'y': request.json['coordinates']['y']}}
+        location_id = database.locations(name=new_location,metadata=metadata)
+
         print(f'\nCreate Location: {new_location}')
-        return jsonify(new_location), 201
+        return jsonify(location_id), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 app.register_blueprint(locations_blueprint)
 
